@@ -1,6 +1,5 @@
 # <center>Aws S3服务的基本使用
 
-
 ## 1、安装并配置凭证
 ### 安装AWS CLI
 1. 想要了解AWS CLI是什么,请参阅[什么是AWS CLI](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-welcome.html)
