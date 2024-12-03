@@ -8,15 +8,15 @@
 3. 具体安装请参阅[AWS CLI安装步骤](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/getting-started-install.html)
 
 ### 配置凭证
-1. 打开Windows PowerShell,输入`aws configure`,开始输入凭证
-2. 按照提示依次输入`AWS Access Key ID`、`AWS Secret Access Key`、`Default region name`对应的值即可
+1. 打开Windows PowerShell,输入`aws configure`,开始输入凭证信息
+2. 按照提示依次输入`AWS Access Key ID`、`AWS Secret Access Key`、`Default region name`对应的值即可完成配置过程
 3. 详细配置过程请参阅,[为配置设置AWS CLI](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html)
 ### 配置结果
 1. 凭证配置完成后,可以在`~/.aws`目录下找到`config`和`credentials`文件
-2. 使用文本编辑器打开`config`文件可以看到配置的`region`
-3. 使用文本编辑器打开`credentials`文件可以看到配置的`aws_access_key_id`和`aws_secret_access_key`
+2. 使用文本编辑器打开`config`文件可以看到配置的`region`信息
+3. 使用文本编辑器打开`credentials`文件可以看到配置的`aws_access_key_id`和`aws_secret_access_key`信息
 ### 检验凭证
-1. 使用文本编辑器打开`~/.aws`目录下的`config`文件和`credentials`文件看到凭证信息,通过比较凭证信息可以检验凭证是否有误
+1. 使用文本编辑器或浏览器打开`~/.aws`目录下的`config`文件和`credentials`文件可以看到凭证信息,通过比较凭证信息可以检验凭证是否有误
 2. 打开Windows PowerShell,输入`aws configure list`命令,可以看到我们进行的一些配置,如![配置图片](D:/aws-image/config.png)
 3. 打开Windows PowerShell,输入`aws s3 ls`可以检验凭证是否有误,如果凭证无误,可以显示我们的存储桶的桶名信息,如![存储桶列表](D:/aws-image/bucket.png)
 4. 打开Windows PowerShell,输入`aws sts-get-caller-identity`,如果凭证无误,可以看到以Json格式显示的身份信息,如![身份信息](D:/aws-image/identity.png)
@@ -48,7 +48,7 @@
 5. 链接器->常规->附加库目录,同上操作,选择静态库文件,即.lib文件所在目录
 6. 链接器->输入->附加依赖项,输入所需静态库名称,如aws-c-auth.lib
 ## 4、代码测试
-1. [Amazon S3 examples using SDK for C++](https://docs.aws.amazon.com/zh_cn/sdk-for-cpp/v1/developer-guide/cpp_s3_code_examples.html)Hello Amazon S3示例
+1. 复制[Amazon S3 examples using SDK for C++](https://docs.aws.amazon.com/zh_cn/sdk-for-cpp/v1/developer-guide/cpp_s3_code_examples.html)Hello Amazon S3示例到工程中编译并运行
 2. 如果库文件配置正确并且凭证配置正确,上述示例会打印存储桶名称
 ## 4、注意事项
 1. 如果验证凭证无误,编译程序出现链接错误,比如`LNK2001 无法解析的外部符号 "char const * const Aws::Http::CONTENT_TYPE_HEADER" (?CONTENT_TYPE_HEADER@Http@Aws@@3QBDB)`以及`LNK2001	无法解析的外部符号 "char const * const Aws::Http::API_VERSION_HEADER" (?API_VERSION_HEADER@Http@Aws@@3QBDB)`
