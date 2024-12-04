@@ -1,25 +1,31 @@
 # <center>Aws S3服务的基本使用
 
-## 1、安装并配置凭证
+## 1、安装软件并配置凭证
+
 ### 安装AWS CLI
-1. 想要了解AWS CLI是什么,请参阅[什么是AWS CLI](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-welcome.html)
+1. 想要了解什么是AWS CLI,请参阅[什么是AWS CLI](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-welcome.html)
 2. 直接安装AWS CLI,Windows平台,[AWS CLI下载链接](https://awscli.amazonaws.com/AWSCLIV2.msi)
-3. 具体安装请参阅[AWS CLI安装步骤](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/getting-started-install.html)
+3. 具体安装过程请参阅[AWS CLI安装步骤](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/getting-started-install.html)
 
 ### 配置凭证
 1. 打开Windows PowerShell,输入`aws configure`,开始输入凭证信息
-2. 按照提示依次输入`AWS Access Key ID`、`AWS Secret Access Key`、`Default region name`对应的值即可完成配置过程
+2. 按照提示依次输入`AWS Access Key ID`、`AWS Secret Access Key`、`Default region name`对应的值,`Default output format`直接回车即可完成配置过程
 3. 详细配置过程请参阅,[为配置设置AWS CLI](https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html)
+   
 ### 配置结果
-1. 凭证配置完成后,可以在`~/.aws`目录下找到`config`和`credentials`文件
+1. 凭证配置完成后,可以在`~/.aws`目录下可以找到`config`和`credentials`文件
 2. 使用文本编辑器打开`config`文件可以看到配置的`region`信息
 3. 使用文本编辑器打开`credentials`文件可以看到配置的`aws_access_key_id`和`aws_secret_access_key`信息
+
 ### 检验凭证
-1. 使用文本编辑器或浏览器打开`~/.aws`目录下的`config`文件和`credentials`文件可以看到凭证信息,通过比较凭证信息可以检验凭证是否有误
+1. 使用文本编辑器打开`~/.aws`目录下的`config`文件和`credentials`文件可以看到凭证信息,通过比较凭证信息可以检验配置的凭证是否有误
 2. 打开Windows PowerShell,输入`aws configure list`命令,可以看到我们进行的一些配置,如![配置图片](https://github.com/guoyuanchao94/images/blob/main/config.png?raw=true)
-3. 打开Windows PowerShell,输入`aws s3 ls`可以检验凭证是否有误,如果凭证无误,可以显示我们的存储桶的桶名信息,如![存储桶列表](https://github.com/guoyuanchao94/images/blob/main/bucket.png?raw=true)
+3. 打开Windows PowerShell,输入`aws s3 ls`可以检验凭证是否有误,如果凭证无误,可以显示我们的存储桶的桶名信息,如![存储桶列表](https://github.com/guoyuanchao94/images/blob/main/bucket.png?raw=true)                           
+否则会显示错误信息,提醒我们的配置不正确或账户存在问题,如![错误信息]()
+
 ### 凭证问题
 1. 打开Windows PowerShell,输入上述命令如果出现`An error occurred (InvalidAccessKeyId) when calling the ListBuckets operation: The AWS Access Key Id you provided does not exist in our records.`等问题,请参阅[为什么我会收到错误信息 "The AWS Access Key Id you provided does not exist in our records?"](https://aws.amazon.com/cn/getting-started/faq/access-key-id-doesnt-exist-in-records/),观看视频寻找解决方法
+
 
 ## 2、下载并编译源码
 ### 下载源码
@@ -35,7 +41,7 @@
 4. 注意以上生成库为Debug模式,想要生成Release模式,将1.和2.中的命令的Debug切换成Release即可
 5. 有关编译源码详细问题请参阅[aws/aws-sdk-cpp](https://github.com/aws/aws-sdk-cpp),有关CMake参数列表,请参阅[CMake参数](https://github.com/aws/aws-sdk-cpp/blob/main/docs/CMake_Parameters.md)
 
-## 3、直接安装库
+## 3、直接安装库文件
 
 ### 安装库文件
 1. 考虑到网络问题,下载aws-sdk-cpp的源码时间可能较长并且可能会失败,考虑使用vcpkg下载和安装aws-sdk-cpp
