@@ -92,17 +92,200 @@
 15. `aws-cpp-sdk-s3.lib`,与 Amazon S3 进行交互的库(类似于 aws-c-s3.lib,但它是 C++ 版本)
 16. `aws-crt-cpp.lib`,AWS CRT(C Runtime) C++ 库,底层的依赖库,提供更高效的操作和与 AWS 服务的更高效通信 
 17. `zlib.lib`,zlib 是一个广泛使用的压缩库,AWS SDK 中会用到它来处理数据的压缩和解压缩
-### 1、创建存储桶
+
+### 存储桶概述和命名规范
+1. 有关存储桶基本概述,请参阅[存储桶概述](https://docs.aws.amazon.com/zh_cn/AmazonS3/latest/userguide/UsingBucket.html)
+2. 有关存储桶命名规范,请参阅[存储桶命名规则](https://docs.aws.amazon.com/zh_cn/AmazonS3/latest/userguide/bucketnamingrules.html)
+
+### 1、检验存储桶是否存在
+```C++
+bool bucketIsExist(const Aws::S3::S3Client& s3Client, const Aws::String& bucketName)
+{
+	auto listOutcome = s3Client.ListBuckets();
+	if (!listOutcome.IsSuccess())
+	{
+		std::cout << "列出存储桶失败" << std::endl;
+		std::cout << listOutcome.GetError().GetMessage() << std::endl;
+		return false;
+	}
+	for (const auto& bucket : listOutcome.GetResult().GetBuckets())
+	{
+		if (bucket.GetName() == bucketName)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+```
+### 2、创建存储桶
+
+```C++
+#include <aws/s3/model/CreateBucketRequest.h>
+#include <aws/s3/model/CreateBucketConfiguration.h>
+
+void CreateBucket(const Aws::S3::S3Client& s3Client, const Aws::String& bucketName)
+{
+	if (bucketName.empty())
+	{
+		std::cout << "创建存储桶的名称为空,请检查" << std::endl;
+		return;
+	}
+    if (bucketIsExist(s3Client, bucketName))
+	{
+		std::cout << "存储桶已经存在,请不要重复创建" << std::endl;
+	}
+	//创建存储桶请求对象
+	Aws::S3::Model::CreateBucketRequest createRequest;	
+	//设置存储的桶名称
+	createRequest.SetBucket(bucketName);	
+	//创建存储桶配置对象
+	Aws::S3::Model::CreateBucketConfiguration createConfiguration;	
+	//设置存储桶的区域
+	createConfiguration.SetLocationConstraint(Aws::S3::Model::BucketLocationConstraint::ap_southeast_1);
+	createRequest.SetCreateBucketConfiguration(createConfiguration);
+	auto createOutcome = s3Client.CreateBucket(createRequest);
+	if (!createOutcome.IsSuccess())
+	{
+		std::cout << "创建存储桶失败" << std::endl;
+		std::cout << createOutcome.GetError().GetMessage() << std::endl;
+		return;
+	}
+	std::cout << "创建存储桶成功" << std::endl;
+}
+```
 
 ### 2、列出存储桶
+```C++
+#include <aws/s3/model/ListBucketsRequest.h>
 
+void ListBucket(const Aws::S3::S3Client& s3Client)
+{
+	Aws::S3::Model::ListBucketsRequest listRequest;
+	listRequest.SetBucketRegion("ap-southeast-1");
+	auto listOutcome = s3Client.ListBuckets(listRequest);
+	if (!listOutcome.IsSuccess())
+	{
+		std::cout << "列出存储桶失败" << std::endl;
+		std::cout << listOutcome.GetError().GetMessage() << std::endl;
+		return;
+	}
+	std::cout << "发现" << listOutcome.GetResult().GetBuckets().size() << "个存储桶" << std::endl;
+	for (const auto& bucket : listOutcome.GetResult().GetBuckets())
+	{
+		std::cout << bucket.GetName() << std::endl;
+	}
+}
+```
 ### 3、删除存储桶
+```C++
+#include <aws/s3/model/DeleteBucketRequest.h>
 
+void DeleteBucket(const Aws::S3::S3Client& s3Client, const Aws::String& bucketName)
+{
+	if (!bucketIsExist(s3Client, bucketName))
+	{
+		std::cout << "名称为" << bucketName << "存储桶不存在,无法删除" << std::endl;
+		return;
+	}
+	Aws::S3::Model::DeleteBucketRequest deleteRequest;
+	deleteRequest.SetBucket(bucketName);
+	auto deleteOutcome = s3Client.DeleteBucket(deleteRequest);
+	if (!deleteOutcome.IsSuccess())
+	{
+		std::cout << "删除存储桶失败" << std::endl;
+		std::cout << deleteOutcome.GetError().GetMessage() << std::endl;
+		return;
+	}
+	std::cout << "删除存储桶" << bucketName << "成功" << std::endl;
+}
+```
 ### 4、上传文件到存储桶
+```C++
+#include <aws/s3/model/PutObjectRequest.h>
 
+void uploadFile(const Aws::S3::S3Client& s3Client, const Aws::String& bucketName, const Aws::String& objectKey, const Aws::String& filePath)
+{
+	if (!bucketIsExist(s3Client, bucketName))
+	{
+		std::cout << "无法上传文件到不存在的存储桶中" << std::endl;
+		return;
+	}
+	Aws::S3::Model::PutObjectRequest putRequest;
+	putRequest.SetBucket(bucketName);
+	putRequest.SetKey(objectKey);
+	std::shared_ptr<Aws::IOStream> inputData = Aws::MakeShared<Aws::FStream>("uploadFileToS3", filePath.c_str(), std::ios_base::in | std::ios_base::binary);
+	if (!*inputData)
+	{
+		std::cerr << "读取文件失败" << std::endl;
+		return;
+	}
+	putRequest.SetBody(inputData);
+	auto putOutcome = s3Client.PutObject(putRequest);
+	if (!putOutcome.IsSuccess())
+	{
+		std::cout << "上传文件失败" << std::endl;
+		std::cout << putOutcome.GetError().GetMessage() << std::endl;
+		return;
+	}
+	std::cout << "添加" << filePath << "到存储桶" << bucketName << "成功" << std::endl;
+}
+```
 ### 5、下载存储桶中文件到本地
+```C++
+#include <aws/s3/model/GetObjectRequest.h>
 
+void downloadFile(const Aws::S3::S3Client& s3Client, const Aws::String& bucketName, const Aws::String& objectKey, const Aws::String &filePath)
+{
+    if (!bucketIsExist(s3Client, bucketName))
+	{
+		std::cout << "无法从不存在的存储桶中下载文件" << std::endl;
+		return;
+	}
+	Aws::S3::Model::GetObjectRequest getRequest;
+
+	getRequest.SetBucket(bucketName);
+	getRequest.SetKey(objectKey);
+
+	auto getOutcome = s3Client.GetObject(getRequest);
+	if (!getOutcome.IsSuccess())
+	{
+		std::cout << "获取对象失败" << std::endl;
+		std::cout << getOutcome.GetError().GetMessage() << std::endl;
+		return;
+	}
+	auto &outputData = getOutcome.GetResultWithOwnership().GetBody();
+	std::ofstream file(filePath.c_str(), std::ios_base::binary);
+	file << outputData.rdbuf();
+	file.close();
+	std::cout << "文件下载成功" << std::endl;
+}
+```
 ### 6、删除存储桶中的文件
+```C++
+#include <aws/s3/model/DeleteObjectRequest.h>
+
+void deleteFile(const Aws::S3::S3Client& s3Client, const Aws::String& bucketName, const Aws::String& objectKey)
+{
+    if (!bucketIsExist(s3Client, bucketName))
+	{
+		std::cout << "无法从不存在的存储桶中删除文件" << std::endl;
+		return;
+	}
+	Aws::S3::Model::DeleteObjectRequest deleteRequest;
+	deleteRequest.SetBucket(bucketName);
+	deleteRequest.SetKey(objectKey);
+	auto deleteOutcome = s3Client.DeleteObject(deleteRequest);
+	if (!deleteOutcome.IsSuccess())
+	{
+		std::cout << "删除存储桶文件失败" << std::endl;
+		std::cout << deleteOutcome.GetError().GetMessage();
+		return;
+	}
+	std::cout << "删除存储桶文件成功" << std::endl;
+}
+```
 
 ### 7、批量上传、批量下载、断点上传、断点下载
 
